@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-public class ListManager<T>:IDisposable where T : IIdentifiable, IDisposable
+public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
 {
     //properties
-    //public int Id { get; set; }
-    //public string Name { get; set; }
     public List<T> Items { get; set; } = new();
     public int NextAvailableId { get; set; }
     public int ActiveId { get; set; }
@@ -39,6 +37,16 @@ public class ListManager<T>:IDisposable where T : IIdentifiable, IDisposable
     private List<Action<int>> _itemActivatedSubscribers = new();
 
 
+
+    //methods
+    public void AddToList(T item)
+    {
+        item.Id = item.Id == -1 ? NextAvailableId++ : CategoryList.GlobalItemId++;
+        item.Name = item.Id.ToString();
+        Items.Add(item);
+        PublishItemAdded(item);
+    }
+
     private void ClearSubscriptions()
     {
         foreach (var subscriber in _itemAddedSubscribers)
@@ -51,16 +59,6 @@ public class ListManager<T>:IDisposable where T : IIdentifiable, IDisposable
             ItemActivated -= subscriber;
         }
         _itemActivatedSubscribers.Clear();
-    }
-
-    //methods
-    public void AddToList(T item)
-    {
-        var id = item.Id == -1 ? NextAvailableId++ : item.Id;
-        item.Id = id;
-        item.Name = id.ToString();
-        Items.Add(item);
-        PublishItemAdded(item);
     }
 
     public void RemoveFromList(T item)

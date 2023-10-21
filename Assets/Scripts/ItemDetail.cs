@@ -3,14 +3,15 @@ using UnityEngine;
 
 public class ItemDetail : IIdentifiable, IDisposable
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = -1;
     public string Name { get; set; }
     public Vector3 OriginalPosition { get; set; }
     public Vector3 ChangedPosition { get; set; }
     public GameObject ItemObject { get; set; }
+    public Category Category { get; set; }
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        UnityEngine.Object.Destroy(ItemObject);
     }
 }
