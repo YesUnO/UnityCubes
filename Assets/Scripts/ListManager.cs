@@ -46,6 +46,10 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
         Items.Add(item);
         PublishItemAdded(item);
     }
+    public void RemoveActiveFromList()
+    {
+
+    }
 
     private void ClearSubscriptions()
     {
@@ -61,11 +65,7 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
         _itemActivatedSubscribers.Clear();
     }
 
-    public void RemoveFromList(T item)
-    {
-
-    }
-
+    
     //Dispose
     public void Dispose()
     {
