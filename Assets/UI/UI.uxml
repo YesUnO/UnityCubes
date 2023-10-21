@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1;">
+        <ui:GroupBox name="Controlls" text="Controlls" style="height: 140px;" />
+        <ui:GroupBox name="CategoryList" text="Category List" style="height: 196px;" />
+        <ui:GroupBox name="Category" text="Category" style="height: 115px;" />
+        <ui:GroupBox name="ItemDetail" text="Item Detail" style="height: 163px;" />
+    </ui:VisualElement>
+</ui:UXML>
