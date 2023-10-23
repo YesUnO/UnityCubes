@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
 {
     //properties
     public List<T> Items { get; set; } = new();
     public int NextAvailableId { get; set; }
-    public int ActiveId { get; set; }
+    public T ActiveItem { get; set; }
 
     //events
-    public Action<T> ItemAdded { get; set; }
-    private List<Action<T>> _itemAddedSubscribers = new();
-    public void SubscribeToItemAdded(Action<T> itemAdded, int? priority = null)
+    public Func<T, Task> ItemAdded { get; set; }
+    private List<Func<T,  Task>> _itemAddedSubscribers = new();
+    public void SubscribeToItemAdded(Func<T, Task> itemAdded, int? priority = null)
     {
         var count = _itemAddedSubscribers.Count;
         if (priority != null && count > 0 && count >= priority)
@@ -24,33 +25,53 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
         }
         ItemAdded += itemAdded;
     }
-    public void PublishItemAdded(T item)
+    public async Task PublishItemAdded(T item)
     {
         foreach (var subscriber in _itemAddedSubscribers)
         {
-            subscriber.Invoke(item);
+            await subscriber.Invoke(item);
         }
     }
 
 
     public Action<int> ItemActivated { get; set; }
     private List<Action<int>> _itemActivatedSubscribers = new();
-
+    public void SubscribeToItemActivated(Action<int> itemActivated, int? priority = null)
+    {
+        var count = _itemAddedSubscribers.Count;
+        if (priority != null && count > 0 && count >= priority)
+        {
+            _itemActivatedSubscribers.Insert((int)priority, itemActivated);
+        }
+        else
+        {
+            _itemActivatedSubscribers.Add(itemActivated);
+        }
+        ItemActivated += itemActivated;
+    }
+    public void PublishItemActivated(int itemId)
+    {
+        foreach (var subscriber in _itemActivatedSubscribers)
+        {
+            subscriber.Invoke(itemId);
+        }
+    }
 
 
     //methods
-    public void AddToList(T item)
+    public async Task AddToList(T item)
     {
         item.Id = item.Id == -1 ? NextAvailableId++ : CategoryList.GlobalItemId++;
         item.Name = item.Id.ToString();
         Items.Add(item);
-        PublishItemAdded(item);
+        await PublishItemAdded(item);
     }
     public void RemoveActiveFromList()
     {
 
     }
 
+    //Dispose
     private void ClearSubscriptions()
     {
         foreach (var subscriber in _itemAddedSubscribers)
@@ -64,9 +85,6 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
         }
         _itemActivatedSubscribers.Clear();
     }
-
-    
-    //Dispose
     public void Dispose()
     {
         ClearSubscriptions();

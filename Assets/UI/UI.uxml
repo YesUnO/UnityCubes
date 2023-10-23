@@ -6,13 +6,15 @@
         <ui:GroupBox name="CategoryList" text="Category List" style="height: 196px;">
             <ui:Label tabindex="-1" text="Active: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Active" />
             <ui:VisualElement style="flex-grow: 1; flex-direction: row; height: 30px; width: 500px;">
-                <ui:Button text="Add" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddCategory" style="width: 59px; height: 37px;" />
-                <ui:Button text="Delete Active" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActive" style="width: 134px; height: 36px;" />
+                <ui:Button text="Add Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddCategory" style="width: 108px; height: 35px;" />
+                <ui:Button text="Delete Active Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveCategory" style="width: 163px; height: 33px;" />
             </ui:VisualElement>
+            <ui:VisualElement name="ListItemsContainer" style="flex-grow: 1; flex-direction: row; height: 51px;" />
         </ui:GroupBox>
         <ui:GroupBox name="Category" text="Category" style="height: 206px;">
             <ui:Label tabindex="-1" text="Active: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Active" />
-            <ui:Button text="Add" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddItem" style="width: 57px; height: 40px;" />
+            <ui:Button text="Add Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddItem" style="width: 79px; height: 34px;" />
+            <ui:VisualElement name="ListItemsContainer" style="flex-grow: 1; flex-direction: row; height: 51px;" />
         </ui:GroupBox>
         <ui:GroupBox name="ItemDetail" text="Item Detail" style="height: 163px;" />
     </ui:VisualElement>
