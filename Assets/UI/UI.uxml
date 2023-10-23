@@ -4,7 +4,6 @@
             <ui:Slider picking-mode="Ignore" label="Cube Distance" value="1.5" high-value="4" name="CubeDistance" low-value="1" style="width: 234px;" />
         </ui:GroupBox>
         <ui:GroupBox name="CategoryList" text="Category List" style="height: 196px;">
-            <ui:Label tabindex="-1" text="Active: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Active" />
             <ui:VisualElement style="flex-grow: 1; flex-direction: row; height: 30px; width: 500px;">
                 <ui:Button text="Add Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddCategory" style="width: 108px; height: 35px;" />
                 <ui:Button text="Delete Active Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveCategory" style="width: 163px; height: 33px;" />
@@ -12,7 +11,6 @@
             <ui:VisualElement name="ListItemsContainer" style="flex-grow: 1; flex-direction: row; height: 51px;" />
         </ui:GroupBox>
         <ui:GroupBox name="Category" text="Category" style="height: 206px;">
-            <ui:Label tabindex="-1" text="Active: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Active" />
             <ui:Button text="Add Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddItem" style="width: 79px; height: 34px;" />
             <ui:VisualElement name="ListItemsContainer" style="flex-grow: 1; flex-direction: row; height: 51px;" />
         </ui:GroupBox>

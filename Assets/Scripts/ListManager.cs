@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
+public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDisposable
 {
     //properties
     public List<T> Items { get; set; } = new();
@@ -11,7 +12,7 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
 
     //events
     public Func<T, Task> ItemAdded { get; set; }
-    private List<Func<T,  Task>> _itemAddedSubscribers = new();
+    private List<Func<T, Task>> _itemAddedSubscribers = new();
     public void SubscribeToItemAdded(Func<T, Task> itemAdded, int? priority = null)
     {
         var count = _itemAddedSubscribers.Count;
@@ -34,9 +35,9 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
     }
 
 
-    public Action<int> ItemActivated { get; set; }
-    private List<Action<int>> _itemActivatedSubscribers = new();
-    public void SubscribeToItemActivated(Action<int> itemActivated, int? priority = null)
+    public Action<T> ItemActivated { get; set; }
+    private List<Action<T>> _itemActivatedSubscribers = new();
+    public void SubscribeToItemActivated(Action<T> itemActivated, int? priority = null)
     {
         var count = _itemAddedSubscribers.Count;
         if (priority != null && count > 0 && count >= priority)
@@ -49,11 +50,11 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
         }
         ItemActivated += itemActivated;
     }
-    public void PublishItemActivated(int itemId)
+    public void PublishItemActivated(T item)
     {
         foreach (var subscriber in _itemActivatedSubscribers)
         {
-            subscriber.Invoke(itemId);
+            subscriber.Invoke(item);
         }
     }
 
@@ -61,10 +62,32 @@ public class ListManager<T> : IDisposable where T : IIdentifiable, IDisposable
     //methods
     public async Task AddToList(T item)
     {
-        item.Id = item.Id == -1 ? NextAvailableId++ : CategoryList.GlobalItemId++;
+        item.Id = item.Id == -1 ? CategoryList.GlobalItemId++ : NextAvailableId++;
         item.Name = item.Id.ToString();
         Items.Add(item);
         await PublishItemAdded(item);
+        ActivateItem(item);
+    }
+
+    public void ActivateItem(int id)
+    {
+        ActivateItem(Items.FirstOrDefault(x => x.Id == id));
+    }
+    private void ActivateItem(T item = null)
+    {
+        if (item == null)
+        {
+            ActiveItem = Items.FirstOrDefault();
+        }
+        else if (item == ActiveItem)
+        {
+            return;
+        }
+        else if (Items.Contains(item))
+        {
+            ActiveItem = item;
+        }
+        PublishItemActivated(item);
     }
     public void RemoveActiveFromList()
     {

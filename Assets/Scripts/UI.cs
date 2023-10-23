@@ -1,4 +1,4 @@
-using System.ComponentModel;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -27,14 +27,18 @@ public class UI : MonoBehaviour
 
         root.styleSheets.Add(_uiStyleSheet);
 
+
+        var cubeDistanceSlider = root.Q<Slider>("CubeDistance");
+        cubeDistanceSlider.RegisterCallback<ChangeEvent<float>>((evt)=>ItemManager.Instance.ChangeCubeDistance(evt.newValue));
+
         var addCategoryBtn = root.Q<Button>("AddCategory");
         addCategoryBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.AddToList(); });
 
         var deleteCategoryBtn = root.Q<Button>("DeleteActiveCategory");
-        addCategoryBtn.RegisterCallback<ClickEvent>(delegate { DeleteActiveCategoryCallback(); });
+        deleteCategoryBtn.RegisterCallback<ClickEvent>(delegate { DeleteActiveCategoryCallback(); });
 
         var addItemBtn = root.Q<Button>("AddItem");
-        addCategoryBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.ActiveItem.AddToList(); });
+        addItemBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.ActiveItem.AddToList(); });
 
         ItemManager.Instance.Categories.SubscribeToItemAdded((category) => HandleCategoryCreated(category));
         ItemManager.Instance.Categories.SubscribeToItemActivated((categoryId) => HandleCategoryActivated(categoryId));
@@ -46,13 +50,15 @@ public class UI : MonoBehaviour
 
     }
 
-    private Button CreateListItemVisualEl(int id, Color color)
+    #region VisualElementsCreation
+    private Button CreateListItemVisualEl<T>(int id, Color color, ListManager<T> list) where T : class, IIdentifiable, IDisposable
     {
         var btn = new Button();
         btn.AddToClassList("genericBtn");
-        btn.name = id.ToString();
-        btn.text= id.ToString();
+        btn.name = $"{typeof(T)}#{id}";
+        btn.text = id.ToString();
         btn.style.color = color;
+        btn.RegisterCallback<ClickEvent>(delegate { list.ActivateItem(id); });
         return btn;
     }
 
@@ -74,10 +80,12 @@ public class UI : MonoBehaviour
     {
         var container = new VisualElement();
         container.style.flexDirection = FlexDirection.Row;
-        container.name = id.ToString();
+        container.name = $"CategoryContainer#{id}";
         var categoriesList = _categoryDetailContainer.Q<VisualElement>("ListItemsContainer");
         categoriesList.Add(container);
     }
+    #endregion
+
 
     private void DeleteActiveCategoryCallback()
     {
@@ -92,29 +100,64 @@ public class UI : MonoBehaviour
         category.SubscribeToItemActivated((id) => HandleItemActivated(id));
 
         CreateCategoryItemContainerVisualEl(category.Id);
+
         var color = GetGameObjectColor(category.Prefab);
-        var btn = CreateListItemVisualEl(category.Id, color);
+        var btn = CreateListItemVisualEl(category.Id, color, ItemManager.Instance.Categories);
+
         var categoriesList = _categoriesContainer.Q<VisualElement>("ListItemsContainer");
         categoriesList.Add(btn);
+
         return Task.CompletedTask;
     }
 
     private Task HandleItemCreated(ItemDetail itemDetail)
     {
         var color = GetGameObjectColor(itemDetail.Category.Prefab);
-        var btn = CreateListItemVisualEl(itemDetail.Id, color);
-        var categoryList = _categoryDetailContainer.Q<VisualElement>("ListItemsContainer").Q(itemDetail.Category.Id.ToString());
-        categoryList.Add(btn);
+        var btn = CreateListItemVisualEl(itemDetail.Id, color, itemDetail.Category);
+        var categoryContainer = _categoryDetailContainer.Q<VisualElement>($"CategoryContainer#{itemDetail.Category.Id}");
+        categoryContainer.Add(btn);
         return Task.CompletedTask;
     }
 
-    private void HandleCategoryActivated(int categoryId)
+    private void HandleCategoryActivated(Category category)
     {
+        foreach (var item in _categoryDetailContainer.Q<VisualElement>("ListItemsContainer").Children())
+        {
+            if (item.name == $"CategoryContainer#{category.Id}")
+            {
+                item.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                item.style.display = DisplayStyle.None;
+            }
+        }
+        foreach (var item in _categoriesContainer.Q<VisualElement>("ListItemsContainer").Children())
+        {
+            if (item.name == $"Category#{category.Id}")
+            {
+                item.AddToClassList("highlighted");
+            }
+            else
+            {
+                item.RemoveFromClassList("highlighted");
+            }
+        }
     }
 
-    private void HandleItemActivated(int itemDetailId)
+    private void HandleItemActivated(ItemDetail itemDetail)
     {
-
+        foreach (var item in _categoryDetailContainer.Q<VisualElement>($"CategoryContainer#{itemDetail.Category.Id}").Children())
+        {
+            if (item.name == $"ItemDetail#{itemDetail.Id}")
+            {
+                item.AddToClassList("highlighted");
+            }
+            else
+            {
+                item.RemoveFromClassList("highlighted");
+            }
+        }
     }
     #endregion
 

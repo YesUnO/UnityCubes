@@ -33,6 +33,15 @@ public class ItemManager : MonoBehaviour
 
     }
 
+    public void ChangeCubeDistance(float distance)
+    {
+        foreach (var item in Categories.Items.SelectMany(x=>x.Items))
+        {
+            var cube = item.ItemObject;
+            cube.transform.position = cube.transform.position/Categories.CubeDistance*distance;
+        }
+        Categories.CubeDistance = distance;
+    }
 
     private Task HandleCategoryAdded(Category category)
     {
@@ -54,7 +63,7 @@ public class ItemManager : MonoBehaviour
     {
         var category = itemDetail.Category;
         var xz = GetXZCoordinates(category);
-        var position = new Vector3(xz.x, category.YCoordinate, xz.y);
+        var position = new Vector3(xz.x, category.YCoordinate, xz.y)*Categories.CubeDistance;
         var cube = Instantiate(category.Prefab, position, Quaternion.identity);
         itemDetail.ItemObject = cube;
         return Task.CompletedTask;
@@ -68,22 +77,19 @@ public class ItemManager : MonoBehaviour
         }
         var res = new Vector2();
 
-        var last = category.LastAdded;
+        var lastAdded = category.LastAdded;
 
-        if (last.x == last.y && last.x != -1)
+        if (lastAdded.x < lastAdded.y)
         {
-            res.x = 0;
-            res.y += last.y;
+            res = new Vector2(lastAdded.y, lastAdded.x);
         }
-        if (last.y > last.x)
+        else if (lastAdded.x > lastAdded.y)
         {
-            res.x = last.y;
-            res.y = last.x;
+            res = new Vector2(lastAdded.y + 1, lastAdded.x);
         }
-        if (last.x > last.y)
+        else if (lastAdded.x != -1 && lastAdded.x == lastAdded.y)
         {
-            res.x = last.y;
-            res.y = last.x + 1;
+            res = new Vector2(0, lastAdded.y + 1);
         }
 
         category.LastAdded = res;
