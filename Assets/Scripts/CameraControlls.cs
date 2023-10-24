@@ -7,7 +7,10 @@ public class CameraControlls : MonoBehaviour
     private float _distance = 10f;
     public float minDistance = 5.0f;
     public float maxDistance = 20.0f;
-    public float scrollSpeed = 20.0f;
+    public float scrollSpeed = 15.0f;
+    
+    private float _cubeDistance;
+    private Vector3 _centroid;
 
     void Start()
     {
@@ -15,21 +18,30 @@ public class CameraControlls : MonoBehaviour
 
     void Update()
     {
+        if (_centroid != ItemManager.Instance.Categories.Centroid || _cubeDistance != ItemManager.Instance.Categories.CubeDistance)
+        {
+            _centroid = ItemManager.Instance.Categories.Centroid;
+            _cubeDistance = ItemManager.Instance.Categories.CubeDistance;
+            targetPosition = _centroid * _cubeDistance;
+            maxDistance = Mathf.Max(20f, _centroid.magnitude * 1.5f * _cubeDistance);
+        }
 
-        var horizontal = Input.GetAxis("Horizontal");
-        var vertical = Input.GetAxis("Vertical");
-        var step = rotationSpeed * Time.deltaTime;
+        else
+        {
+            var horizontal = Input.GetAxis("Horizontal");
+            var vertical = Input.GetAxis("Vertical");
+            var step = rotationSpeed * Time.deltaTime;
 
-        var normalized = new Vector3(horizontal * step, vertical * step, 0).normalized;
-        transform.Translate(new Vector3(horizontal * step, vertical * step, 0));
+            transform.Translate(new Vector3(horizontal * step, vertical * step, 0));
 
-        transform.LookAt(targetPosition);
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            _distance -= scroll * scrollSpeed;
+            _distance = Mathf.Clamp(_distance, minDistance, maxDistance);
 
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        _distance -= scroll * scrollSpeed;
-
-        _distance = Mathf.Clamp(_distance, minDistance, maxDistance);
-
-        transform.position = transform.position.normalized * _distance;
+            Vector3 direction = transform.position - targetPosition;
+            direction = direction.normalized * _distance;
+            transform.position = targetPosition + direction;
+            transform.LookAt(targetPosition);
+        }
     }
 }

@@ -80,6 +80,10 @@ public class ItemManager : MonoBehaviour
         var xz = GetXZCoordinates(category);
         var position = new Vector3(xz.x, category.YCoordinate, xz.y);
         var cube = Instantiate(category.Prefab, position * Categories.CubeDistance, Quaternion.identity);
+        
+        category.AddToCentroid(position);
+        Categories.AddToCentroid(position);
+        
         itemDetail.ItemObject = cube;
         itemDetail.OriginalPosition = position;
         itemDetail.ChangedPosition = position;
