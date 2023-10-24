@@ -114,7 +114,6 @@ public class ItemManager : MonoBehaviour
     {
         if (_selectedItem != null && _selectedItem.ItemObject != null)
         {
-            Debug.Log($"activating {itemDetail.Id} deactivating {_selectedItem.Id}");
             SetItemState(_selectedItem.ItemObject, ItemState.Selected, false);
         }
         SetItemState(itemDetail.ItemObject, ItemState.Selected);

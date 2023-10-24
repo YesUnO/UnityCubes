@@ -94,7 +94,6 @@ public class DragAndDropManager : MonoBehaviour
         var draggedItem = ItemManager.Instance.Categories.Items.SelectMany(x => x.Items).FirstOrDefault(x => x.ItemObject == _target);
         if (draggedItem != null)
         {
-            Debug.Log($"item {draggedItem.Id} of {draggedItem.Category.Id}");
             ItemManager.Instance.Categories.ActivateItem(draggedItem.Category.Id);
             draggedItem.Category.ActivateItem(draggedItem.Id);
         }

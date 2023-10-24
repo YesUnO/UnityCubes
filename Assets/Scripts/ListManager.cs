@@ -79,11 +79,7 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         {
             ActiveItem = Items.FirstOrDefault();
         }
-        else if (item == ActiveItem)
-        {
-            return;
-        }
-        else if (Items.Contains(item))
+        if (Items.Contains(item))
         {
             ActiveItem = item;
         }
