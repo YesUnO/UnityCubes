@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DragAndDropManager : MonoBehaviour
@@ -9,6 +10,14 @@ public class DragAndDropManager : MonoBehaviour
     private Vector3 _originalPos;
     public Vector3 screenSpace;
     public Vector3 offset;
+    public bool dragging = false;
+
+    public static DragAndDropManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     // Use this for initialization
     void Start()
@@ -30,13 +39,14 @@ public class DragAndDropManager : MonoBehaviour
                 screenSpace = Camera.main.WorldToScreenPoint(_target.transform.position);
                 offset = _target.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenSpace.z));
                 _originalPos = _target.transform.position;
+                dragging = true;
             }
         }
         if (Input.GetMouseButtonUp(0))
         {
             if (_target != null)
             {
-                if (TryGetMostOverlappedObj(_target,out var collided))
+                if (TryGetMostOverlappedObj(_target, out var collided))
                 {
                     ItemManager.Instance.SwitchItemsPositions(_target, collided);
                 }
@@ -44,7 +54,9 @@ public class DragAndDropManager : MonoBehaviour
                 {
                     _target.transform.position = _originalPos;
                 }
+                ActivateCliecked();
             }
+            dragging = false;
             _target = null;
             _mouseState = false;
         }
@@ -74,13 +86,23 @@ public class DragAndDropManager : MonoBehaviour
         return target;
     }
 
+    private void ActivateCliecked()
+    {
+        var draggedItem = ItemManager.Instance.Categories.Items.SelectMany(x => x.Items).FirstOrDefault(x => x.ItemObject == _target);
+        if (draggedItem != null)
+        {
+            ItemManager.Instance.Categories.ActivateItem(draggedItem.Category.Id);
+            draggedItem.Category.ActivateItem(draggedItem.Id);
+        }
+    }
+
     bool TryGetMostOverlappedObj(GameObject cube, out GameObject collided)
     {
         float maxOverlap = 0f;
         collided = null;
 
         Collider[] colliders = Physics.OverlapBox(cube.transform.position, cube.transform.localScale / 2f);
-        
+
         foreach (Collider collider in colliders)
         {
             if (collider.gameObject != cube && collider.transform.localScale == cube.transform.localScale)
@@ -102,7 +124,7 @@ public class DragAndDropManager : MonoBehaviour
                 {
                     maxOverlap = overlapRatio;
                     collided = collider.gameObject;
-                    return true; 
+                    return true;
                 }
             }
         }

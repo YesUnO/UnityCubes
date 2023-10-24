@@ -16,6 +16,9 @@ public class UI : MonoBehaviour
     private VisualElement _categoriesContainer;
     private VisualElement _itemDetailContainer;
 
+    private int _activeCategoryId;
+    private int _activeItemDetailId;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -121,6 +124,10 @@ public class UI : MonoBehaviour
 
     private void HandleCategoryActivated(Category category)
     {
+        if (category.Id == _activeCategoryId)
+        {
+            return;
+        }
         foreach (var item in _categoryDetailContainer.Q<VisualElement>("ListItemsContainer").Children())
         {
             if (item.name == $"CategoryContainer#{category.Id}")
@@ -143,10 +150,15 @@ public class UI : MonoBehaviour
                 item.RemoveFromClassList("highlighted");
             }
         }
+        _activeCategoryId = category.Id;
     }
 
     private void HandleItemActivated(ItemDetail itemDetail)
     {
+        if (itemDetail.Id == _activeItemDetailId)
+        {
+            return;
+        }
         foreach (var item in _categoryDetailContainer.Q<VisualElement>($"CategoryContainer#{itemDetail.Category.Id}").Children())
         {
             if (item.name == $"ItemDetail#{itemDetail.Id}")
@@ -158,6 +170,8 @@ public class UI : MonoBehaviour
                 item.RemoveFromClassList("highlighted");
             }
         }
+        _activeItemDetailId = itemDetail.Id;
+
     }
     #endregion
 

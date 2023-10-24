@@ -7,7 +7,7 @@ public class CameraControlls : MonoBehaviour
     private float _distance = 10f;
     public float minDistance = 5.0f;
     public float maxDistance = 20.0f;
-    public float scrollSpeed = 2.0f;
+    public float scrollSpeed = 20.0f;
 
     void Start()
     {
