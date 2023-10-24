@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [Serializable]
@@ -18,11 +19,14 @@ public class ItemManager : MonoBehaviour
 
     public static ItemManager Instance { get; private set; }
 
+    private CameraControlls _cameraControlls;
+
     private void Awake() => Instance = this;
 
     // Start is called before the first frame update
     void Start()
     {
+        _cameraControlls = FindObjectOfType<CameraControlls>();
         Categories.SubscribeToItemAdded((category) => HandleCategoryAdded(category), 0);
         Categories.AddToList();
     }
@@ -41,6 +45,7 @@ public class ItemManager : MonoBehaviour
             cube.transform.position = cube.transform.position / Categories.CubeDistance * distance;
         }
         Categories.CubeDistance = distance;
+        _cameraControlls.AdjustTargetPosition(Categories.Centroid, distance);
     }
 
     public void SwitchItemsPositions(GameObject obj1, GameObject obj2)
@@ -80,10 +85,11 @@ public class ItemManager : MonoBehaviour
         var xz = GetXZCoordinates(category);
         var position = new Vector3(xz.x, category.YCoordinate, xz.y);
         var cube = Instantiate(category.Prefab, position * Categories.CubeDistance, Quaternion.identity);
-        
+
         category.AddToCentroid(position);
         Categories.AddToCentroid(position);
-        
+        _cameraControlls.AdjustTargetPosition(Categories.Centroid, Categories.CubeDistance);
+
         itemDetail.ItemObject = cube;
         itemDetail.OriginalPosition = position;
         itemDetail.ChangedPosition = position;

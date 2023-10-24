@@ -32,6 +32,7 @@ public class UI : MonoBehaviour
 
 
         var cubeDistanceSlider = root.Q<Slider>("CubeDistance");
+        cubeDistanceSlider.focusable = false;
         cubeDistanceSlider.RegisterCallback<ChangeEvent<float>>((evt)=>ItemManager.Instance.ChangeCubeDistance(evt.newValue));
 
         var addCategoryBtn = root.Q<Button>("AddCategory");
