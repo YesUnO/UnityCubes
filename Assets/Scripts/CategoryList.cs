@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 public class CategoryList : ListManager<Category>
 {
@@ -21,5 +22,14 @@ public class CategoryList : ListManager<Category>
     private int GetYCoordinate()
     {
         return MissingYCoordinates.Count > 0 ? MissingYCoordinates.FirstOrDefault(): NextYCoordinates++;
+    }
+
+    public List<ItemDetail> GetItemDetailsByGameObjects(List<GameObject> gameObjects)
+    {
+        return Items
+            .SelectMany(x=>x.Items)
+            .Where(x=>gameObjects.Contains(x.ItemObject))
+            .OrderBy(x=>gameObjects.IndexOf(x.ItemObject))
+            .ToList();
     }
 }

@@ -35,12 +35,27 @@ public class ItemManager : MonoBehaviour
 
     public void ChangeCubeDistance(float distance)
     {
-        foreach (var item in Categories.Items.SelectMany(x=>x.Items))
+        foreach (var item in Categories.Items.SelectMany(x => x.Items))
         {
             var cube = item.ItemObject;
-            cube.transform.position = cube.transform.position/Categories.CubeDistance*distance;
+            cube.transform.position = cube.transform.position / Categories.CubeDistance * distance;
         }
         Categories.CubeDistance = distance;
+    }
+
+    public void SwitchItemsPositions(GameObject obj1, GameObject obj2)
+    {
+        var itemDetails = Categories.GetItemDetailsByGameObjects(new List<GameObject> { obj1, obj2 });
+        if (itemDetails.Count != 2)
+        {
+            return;
+        }
+
+        var item1 = itemDetails[0];
+        var item2 = itemDetails[1];
+
+        (obj1.transform.position, obj2.transform.position) = (item2.ChangedPosition * Categories.CubeDistance, item1.ChangedPosition * Categories.CubeDistance);
+        (item1.ChangedPosition, item2.ChangedPosition) = (item2.ChangedPosition, item1.ChangedPosition);
     }
 
     private Task HandleCategoryAdded(Category category)
@@ -63,9 +78,11 @@ public class ItemManager : MonoBehaviour
     {
         var category = itemDetail.Category;
         var xz = GetXZCoordinates(category);
-        var position = new Vector3(xz.x, category.YCoordinate, xz.y)*Categories.CubeDistance;
-        var cube = Instantiate(category.Prefab, position, Quaternion.identity);
+        var position = new Vector3(xz.x, category.YCoordinate, xz.y);
+        var cube = Instantiate(category.Prefab, position * Categories.CubeDistance, Quaternion.identity);
         itemDetail.ItemObject = cube;
+        itemDetail.OriginalPosition = position;
+        itemDetail.ChangedPosition = position;
         return Task.CompletedTask;
     }
 
