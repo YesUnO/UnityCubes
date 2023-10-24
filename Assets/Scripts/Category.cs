@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class Category : ListManager<ItemDetail>, IIdentifiable
@@ -24,10 +25,10 @@ public class Category : ListManager<ItemDetail>, IIdentifiable
         ItemCount--;
     }
 
-    public void AddToList()
+    public async Task AddToList()
     {
         var item = new ItemDetail();
         item.Category = this;
-        AddToList(item);
+        await AddToList(item);
     }
 }

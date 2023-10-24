@@ -29,7 +29,7 @@ public class CategoryList : ListManager<Category>
         var category = new Category();
         category.YCoordinate = GetYCoordinate();
         await AddToList(category);
-        category.AddToList();
+        await category.AddToList();
     }
 
     private int GetYCoordinate()

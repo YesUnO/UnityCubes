@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -10,7 +8,8 @@ public class DragAndDropManager : MonoBehaviour
     private Vector3 _originalPos;
     public Vector3 screenSpace;
     public Vector3 offset;
-    public bool dragging = false;
+    public bool IsDragging = false;
+    private GameObject _collided;
 
     public static DragAndDropManager Instance { get; private set; }
 
@@ -39,24 +38,26 @@ public class DragAndDropManager : MonoBehaviour
                 screenSpace = Camera.main.WorldToScreenPoint(_target.transform.position);
                 offset = _target.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenSpace.z));
                 _originalPos = _target.transform.position;
-                dragging = true;
+                ActivateCliecked();
+                IsDragging = true;
             }
         }
         if (Input.GetMouseButtonUp(0))
         {
             if (_target != null)
             {
-                if (TryGetMostOverlappedObj(_target, out var collided))
+                if (_collided != null)
                 {
-                    ItemManager.Instance.SwitchItemsPositions(_target, collided);
+                    ItemManager.Instance.SetItemState(_collided, ItemState.Collided, false);
+                    ItemManager.Instance.SwitchItemsPositions(_target, _collided);
+                    _collided = null;
                 }
                 else
                 {
                     _target.transform.position = _originalPos;
                 }
-                ActivateCliecked();
             }
-            dragging = false;
+            IsDragging = false;
             _target = null;
             _mouseState = false;
         }
@@ -70,6 +71,8 @@ public class DragAndDropManager : MonoBehaviour
 
             //update the position of the object in the world
             _target.transform.position = curPosition;
+
+            GetMostOverlappedObj();
         }
     }
 
@@ -91,23 +94,25 @@ public class DragAndDropManager : MonoBehaviour
         var draggedItem = ItemManager.Instance.Categories.Items.SelectMany(x => x.Items).FirstOrDefault(x => x.ItemObject == _target);
         if (draggedItem != null)
         {
+            Debug.Log($"item {draggedItem.Id} of {draggedItem.Category.Id}");
             ItemManager.Instance.Categories.ActivateItem(draggedItem.Category.Id);
             draggedItem.Category.ActivateItem(draggedItem.Id);
         }
     }
 
-    bool TryGetMostOverlappedObj(GameObject cube, out GameObject collided)
+    private void GetMostOverlappedObj()
     {
         float maxOverlap = 0f;
-        collided = null;
 
-        Collider[] colliders = Physics.OverlapBox(cube.transform.position, cube.transform.localScale / 2f);
+        GameObject collided = null;
+
+        Collider[] colliders = Physics.OverlapBox(_target.transform.position, _target.transform.localScale / 2f);
 
         foreach (Collider collider in colliders)
         {
-            if (collider.gameObject != cube && collider.transform.localScale == cube.transform.localScale)
+            if (collider.gameObject != _target && collider.transform.localScale == _target.transform.localScale)
             {
-                Bounds bounds1 = cube.GetComponent<Collider>().bounds;
+                Bounds bounds1 = _target.GetComponent<Collider>().bounds;
                 Bounds bounds2 = collider.bounds;
                 float overlapX = Mathf.Min(bounds1.max.x, bounds2.max.x) - Mathf.Max(bounds1.min.x, bounds2.min.x);
                 float overlapY = Mathf.Min(bounds1.max.y, bounds2.max.y) - Mathf.Max(bounds1.min.y, bounds2.min.y);
@@ -124,11 +129,21 @@ public class DragAndDropManager : MonoBehaviour
                 {
                     maxOverlap = overlapRatio;
                     collided = collider.gameObject;
-                    return true;
                 }
             }
         }
-
-        return false; // No significant overlap detected
+        if (_collided != null && _collided != collided)
+        {
+            ItemManager.Instance.SetItemState(_collided, ItemState.Collided, false);
+        }
+        if (collided != null)
+        {
+            _collided = collided;
+            ItemManager.Instance.SetItemState(_collided, ItemState.Collided);
+        }
+        else
+        {
+            _collided = null;
+        }
     }
 }
