@@ -40,6 +40,9 @@ public class UI : MonoBehaviour
         var deleteCategoryBtn = root.Q<Button>("DeleteActiveCategory");
         deleteCategoryBtn.RegisterCallback<ClickEvent>(delegate { DeleteActiveCategoryCallback(); });
 
+        var deleteItemBtn = root.Q<Button>("DeleteActiveItem");
+        deleteItemBtn.RegisterCallback<ClickEvent>(delegate { DeleteActiveItemCallback(); });
+
         var addItemBtn = root.Q<Button>("AddItem");
         addItemBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.ActiveItem.AddToList(); });
 
@@ -92,6 +95,35 @@ public class UI : MonoBehaviour
 
     private void DeleteActiveCategoryCallback()
     {
+        try
+        {
+            var categoryId = ItemManager.Instance.Categories.ActiveItem.Id;
+            ItemManager.Instance.RemoveActiveCategory();
+            var btn = _categoriesContainer.Q<Button>($"Category#{categoryId}");
+            var container = _categoryDetailContainer.Q($"CategoryContainer#{categoryId}");
+            btn.RemoveFromHierarchy();
+            container.RemoveFromHierarchy();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Debug.LogError(ex.Message);
+        }
+        
+    }
+
+    private void DeleteActiveItemCallback()
+    {
+        try
+        {
+            var itemId = ItemManager.Instance.Categories.ActiveItem.ActiveItem.Id;
+            ItemManager.Instance.RemoveActiveItem();
+            var btn = _categoriesContainer.Q<Button>($"ItemDetial#{itemId}");
+            btn.RemoveFromHierarchy();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Debug.LogError(ex.Message);
+        }
 
     }
 

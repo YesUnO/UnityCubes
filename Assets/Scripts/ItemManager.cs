@@ -48,6 +48,22 @@ public class ItemManager : MonoBehaviour
 
     }
 
+    public void RemoveActiveCategory()
+    {
+        var categoryCentroid = Categories.ActiveItem.Centroid;
+        var categoryCount = Categories.ActiveItem.ItemCount;
+        Categories.RemoveActiveFromList();
+        Categories.SubstractFromCentroid(categoryCentroid,categoryCount);
+    }
+
+    public void RemoveActiveItem()
+    {
+        var itemPos = Categories.ActiveItem.ActiveItem.ChangedPosition;
+        Categories.ActiveItem.RemoveActiveFromList();
+        Categories.SubstractFromCentroid(itemPos);
+        Categories.ActiveItem.SubstractFromCentroid(itemPos);
+    }
+
     #region CubeProperties
     public void ChangeCubeDistance(float distance)
     {

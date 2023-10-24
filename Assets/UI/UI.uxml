@@ -14,6 +14,8 @@
             <ui:Button text="Add Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddItem" style="width: 79px; height: 34px;" />
             <ui:VisualElement name="ListItemsContainer" style="flex-grow: 1; flex-direction: row; height: 51px;" />
         </ui:GroupBox>
-        <ui:GroupBox name="ItemDetail" text="Item Detail" style="height: 163px;" />
+        <ui:GroupBox name="ItemDetail" text="Item Detail" style="height: 163px;">
+            <ui:Button text="Delete Active Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveItem" style="width: 141px; height: 34px;" />
+        </ui:GroupBox>
     </ui:VisualElement>
 </ui:UXML>

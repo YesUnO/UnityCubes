@@ -87,7 +87,14 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
     }
     public void RemoveActiveFromList()
     {
-
+        if (Items.Count<=1 || ActiveItem == null)
+        {
+            throw new InvalidOperationException("Cant remove last item.");
+        }
+        var index = Items.IndexOf(ActiveItem);
+        ActiveItem.Dispose();
+        Items.RemoveAt(index);
+        ActivateItem();
     }
 
     //Dispose
@@ -111,6 +118,7 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         {
             item.Dispose();
         }
+        Items.Clear();
     }
 }
 

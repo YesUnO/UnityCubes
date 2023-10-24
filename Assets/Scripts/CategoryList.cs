@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,10 +17,10 @@ public class CategoryList : ListManager<Category>
         ItemCount++;
     }
 
-    public void SubstractFromCentroid(Vector3 vector)
+    public void SubstractFromCentroid(Vector3 vector, int itemCount = 1)
     {
         Centroid = (Centroid * ItemCount - vector) / (ItemCount - 1);
-        ItemCount--;
+        ItemCount-=itemCount;
     }
 
     public async void AddToList()
