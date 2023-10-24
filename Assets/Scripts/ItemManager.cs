@@ -37,6 +37,8 @@ public class ItemManager : MonoBehaviour
     {
         _cameraControlls = FindObjectOfType<CameraControlls>();
         Categories.SubscribeToItemAdded((category) => HandleCategoryAdded(category), 0);
+        Categories.SubscribeToItemActivated((category) => HandleCategoryActivated(category));
+        
         Categories.AddToList();
     }
 
@@ -91,6 +93,20 @@ public class ItemManager : MonoBehaviour
         (obj1.transform.position, obj2.transform.position) = (item2.ChangedPosition * Categories.CubeDistance, item1.ChangedPosition * Categories.CubeDistance);
         (item1.ChangedPosition, item2.ChangedPosition) = (item2.ChangedPosition, item1.ChangedPosition);
     }
+
+    private void SetActiveItem(ItemDetail itemDetail)
+    {
+        if (itemDetail == null)
+        {
+            return;
+        }
+        if (_selectedItem != null && _selectedItem.ItemObject != null)
+        {
+            SetItemState(_selectedItem.ItemObject, ItemState.Selected, false);
+        }
+        SetItemState(itemDetail.ItemObject, ItemState.Selected);
+        _selectedItem = itemDetail;
+    }
     #endregion
 
     #region EventHandlers
@@ -112,12 +128,12 @@ public class ItemManager : MonoBehaviour
 
     private void HandleItemActivated(ItemDetail itemDetail)
     {
-        if (_selectedItem != null && _selectedItem.ItemObject != null)
-        {
-            SetItemState(_selectedItem.ItemObject, ItemState.Selected, false);
-        }
-        SetItemState(itemDetail.ItemObject, ItemState.Selected);
-        _selectedItem = itemDetail;
+        SetActiveItem(itemDetail);
+    }
+
+    private void HandleCategoryActivated(Category category)
+    {
+        SetActiveItem(category.ActiveItem);
     }
 
 

@@ -101,7 +101,7 @@ public class DragAndDropManager : MonoBehaviour
 
     private void GetMostOverlappedObj()
     {
-        float maxOverlap = 0f;
+        float maxOverlap = 0.1f;
 
         GameObject collided = null;
 

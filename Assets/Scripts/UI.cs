@@ -126,6 +126,11 @@ public class UI : MonoBehaviour
     {
         if (category.Id == _activeCategoryId)
         {
+            var item = _categoriesContainer.Q<Button>($"Category#{category.Id}");
+            if (!item.ClassListContains("highlighted"))
+            {
+                item.AddToClassList("highlighted");
+            }
             return;
         }
         foreach (var item in _categoryDetailContainer.Q<VisualElement>("ListItemsContainer").Children())
@@ -157,6 +162,11 @@ public class UI : MonoBehaviour
     {
         if (itemDetail.Id == _activeItemDetailId)
         {
+            var item = _categoryDetailContainer.Q<Button>($"ItemDetail#{itemDetail.Id}");
+            if (!item.ClassListContains("highlighted"))
+            {
+                item.AddToClassList("highlighted");
+            }
             return;
         }
         foreach (var item in _categoryDetailContainer.Q<VisualElement>($"CategoryContainer#{itemDetail.Category.Id}").Children())
