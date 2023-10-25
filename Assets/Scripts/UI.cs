@@ -106,7 +106,7 @@ public class UI : MonoBehaviour
         }
         catch (InvalidOperationException ex)
         {
-            Debug.LogError(ex.Message);
+            //Debug.LogError(ex.Message);
         }
 
     }
