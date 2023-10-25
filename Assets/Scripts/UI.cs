@@ -213,8 +213,6 @@ public class UI : MonoBehaviour
                 item.RemoveFromClassList("highlighted");
             }
         }
-        Debug.Log($"item {itemDetail.Id} showwn");
-
     }
     #endregion
 
