@@ -1,7 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
-        <ui:Button text="&lt;-" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Left" style="height: 45px;" />
-        <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="AlwaysVisible" style="height: 68px; width: 337px;" />
-        <ui:Button text="-&gt;" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Right" style="height: 45px;" />
-    </ui:VisualElement>
-</ui:UXML>

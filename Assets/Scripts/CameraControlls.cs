@@ -9,6 +9,7 @@ public class CameraControlls : MonoBehaviour
     public float minDistance = 5.0f;
     public float maxDistance = 20.0f;
     public float scrollSpeed = 15.0f;
+    public float easeSpeed = 15f;
 
     private float _cubeDistance;
     private Vector3 _centroid;
@@ -56,7 +57,9 @@ public class CameraControlls : MonoBehaviour
 
     private void EaseIntoNewPosition()
     {
-        targetPosition = Vector3.MoveTowards(targetPosition, _newTargetPosition, Time.deltaTime * 5f);
+        var distance = Vector3.Distance(_newTargetPosition, targetPosition);
+        easeSpeed = Mathf.Max(easeSpeed, distance/easeSpeed); 
+        targetPosition = Vector3.MoveTowards(targetPosition, _newTargetPosition, Time.deltaTime * easeSpeed);
         if (targetPosition == _newTargetPosition)
         {
             _targetMoving = false;

@@ -49,15 +49,12 @@ public class ItemManager : MonoBehaviour
     public void RemoveActiveCategory()
     {
         var category = Categories.ActiveItem;
-        var categoryCentroid = category.Centroid;
-        var categoryCount = category.ItemCount;
         Categories.RemoveActiveFromList();
 
         Categories.MissingYCoordinates.Add(category.YCoordinate);
         var prefab = Prefabs.FirstOrDefault(x => x.gameObj == category.Prefab);
         prefab.used = false;
 
-        Categories.SubstractFromCentroid(categoryCentroid, categoryCount);
         AdjustCamera();
     }
 
@@ -68,8 +65,6 @@ public class ItemManager : MonoBehaviour
 
         AddToMissingCoordinates(itemPos);
 
-        Categories.SubstractFromCentroid(itemPos);
-        Categories.ActiveItem.SubstractFromCentroid(itemPos);
         AdjustCamera();
     }
 
@@ -84,7 +79,9 @@ public class ItemManager : MonoBehaviour
 
     public void AdjustCamera()
     {
-        _cameraControlls.AdjustTargetPosition(Categories.Centroid, Categories.CubeDistance);
+        var vectors = Categories.Items.SelectMany(x=>x.Items).Select(x=>x.ChangedPosition).ToList();
+        var centroid = vectors.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / vectors.Count;
+        _cameraControlls.AdjustTargetPosition(centroid, Categories.CubeDistance);
     }
 
     #region CubeProperties
@@ -96,7 +93,7 @@ public class ItemManager : MonoBehaviour
             cube.transform.position = cube.transform.position / Categories.CubeDistance * distance;
         }
         Categories.CubeDistance = distance;
-        _cameraControlls.AdjustTargetPosition(Categories.Centroid, distance);
+        AdjustCamera();
     }
 
     public void SetItemState(GameObject gameObject, ItemState itemState, bool value = true)
@@ -167,13 +164,12 @@ public class ItemManager : MonoBehaviour
         var position = GetXZCoordinates(category);
         var cube = Instantiate(category.Prefab, position * Categories.CubeDistance, Quaternion.identity);
 
-        category.AddToCentroid(position);
-        Categories.AddToCentroid(position);
-        AdjustCamera();
-
         itemDetail.ItemObject = cube;
         itemDetail.OriginalPosition = position;
         itemDetail.ChangedPosition = position;
+
+        AdjustCamera();
+
         return Task.FromResult(true);
     }
 
