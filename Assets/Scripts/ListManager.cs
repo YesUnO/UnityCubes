@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDisposable
+public abstract class ListManager<T> : IDisposable where T : class, IIdentifiable, IDisposable
 {
     //properties
     public List<T> Items { get; set; } = new();
@@ -89,7 +89,32 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         {
             ActiveItem = Items.FirstOrDefault();
         }
+        if (item == ActiveItem)
+        {
+            //TOFO: not yet
+            //return;
+        }
         else if (Items.Contains(item))
+        {
+            ActiveItem = item;
+        }
+        if (ActiveItem != null)
+        {
+            PublishItemActivated(ActiveItem);
+            if (ActiveItem is Category category)
+            {
+                category.ActivateSubsequent();
+            }
+            if (ActiveItem is ItemDetail itemDetail)
+            {
+                itemDetail.Category.CategoryList.ActivateItem(itemDetail.Category);
+            }
+        }
+    }
+
+    private void ActivateSubsequent(T item = null)
+    {
+        if (item != null)
         {
             ActiveItem = item;
         }
@@ -98,6 +123,7 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
             PublishItemActivated(ActiveItem);
         }
     }
+
     public void RemoveActiveFromList()
     {
         if (Items.Count <= 1 || ActiveItem == null)

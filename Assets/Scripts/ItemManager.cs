@@ -37,8 +37,6 @@ public class ItemManager : MonoBehaviour
     {
         _cameraControlls = FindObjectOfType<CameraControlls>();
         Categories.SubscribeToItemAdded((category) => HandleCategoryAdded(category), 0);
-        Categories.SubscribeToItemActivated((category) => HandleCategoryActivated(category));
-
         Categories.AddToList();
     }
 
@@ -154,12 +152,6 @@ public class ItemManager : MonoBehaviour
         SetActiveItemGameObj(itemDetail);
     }
 
-    private void HandleCategoryActivated(Category category)
-    {
-        SetActiveItemGameObj(category.ActiveItem);
-    }
-
-
     private Task<bool> HandleItemAdded(ItemDetail itemDetail)
     {
         var category = itemDetail.Category;
@@ -180,7 +172,10 @@ public class ItemManager : MonoBehaviour
     {
         if (category.MissingCoordinates.Count > 0)
         {
-            return category.MissingCoordinates.FirstOrDefault();
+            var res = category.MissingCoordinates[0];
+            category.MissingCoordinates.RemoveAt(0);
+            return res;
+
         }
         var xyCoordinates = new Vector2();
 

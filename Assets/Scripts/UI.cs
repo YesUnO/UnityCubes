@@ -16,8 +16,8 @@ public class UI : MonoBehaviour
     private VisualElement _itemDetailContainer;
     private ScrollView _itemsScrollView;
 
-    private int _activeCategoryId;
-    private ItemDetail _activeItem;
+    private VisualElement _scrollTo = null;
+
 
     // Start is called before the first frame update
     void Start()
@@ -55,7 +55,11 @@ public class UI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (_scrollTo != null)
+        {
+            _itemsScrollView.ScrollTo(_scrollTo);
+            _scrollTo = null;
+        }
     }
 
     #region VisualElementsManagment
@@ -92,14 +96,6 @@ public class UI : MonoBehaviour
         _itemsScrollView.Add(container);
     }
 
-    private void ScrollToActiveItem()
-    {
-        var btn = _itemsScrollView.Q<Button>(_activeItem.UiElName);
-        if (btn != null)
-        {
-            _itemsScrollView.ScrollTo(btn);
-        }
-    }
     #endregion
 
 
@@ -170,15 +166,6 @@ public class UI : MonoBehaviour
 
     private void HandleCategoryActivated(Category category)
     {
-        if (category.Id == _activeCategoryId)
-        {
-            var item = _categoriesContainer.Q<Button>(category.UiElName);
-            if (!item.ClassListContains("highlighted"))
-            {
-                item.AddToClassList("highlighted");
-            }
-            return;
-        }
         foreach (var item in _itemsScrollView.Children())
         {
             if (item.name == category.ContainerUiElName)
@@ -201,35 +188,33 @@ public class UI : MonoBehaviour
                 item.RemoveFromClassList("highlighted");
             }
         }
-        _activeCategoryId = category.Id;
-        _activeItem = category.ActiveItem;
-        ScrollToActiveItem();
+        Debug.Log($"category {category.Id} showwn");
     }
 
     private void HandleItemActivated(ItemDetail itemDetail)
     {
-        if (itemDetail == _activeItem)
-        {
-            var item = _categoryDetailContainer.Q<Button>(itemDetail.UiElName);
-            if (!item.ClassListContains("highlighted"))
-            {
-                item.AddToClassList("highlighted");
-            }
-            return;
-        }
+        
         foreach (var item in _categoryDetailContainer.Q<VisualElement>(itemDetail.Category.ContainerUiElName).Children())
         {
             if (item.name == itemDetail.UiElName)
             {
                 item.AddToClassList("highlighted");
+                if (item.layout.width > 0 && _itemsScrollView.layout.width > 0)
+                {
+                    _itemsScrollView.ScrollTo(item);
+                }
+                else
+                {
+                    _scrollTo = item;
+                }
             }
             else
             {
                 item.RemoveFromClassList("highlighted");
             }
         }
-        _activeItem = itemDetail;
-        ScrollToActiveItem();
+        Debug.Log($"item {itemDetail.Id} showwn");
+
     }
     #endregion
 

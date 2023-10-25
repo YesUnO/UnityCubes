@@ -12,9 +12,16 @@ public class Category : ListManager<ItemDetail>, IIdentifiable
     public Vector2 LastAdded { get; set; } = new Vector2(-1, -1);
     public Vector3 Centroid { get; private set; }
     public int ItemCount { get; private set; }
+    public CategoryList CategoryList { get; }
 
     public string UiElName { get { return $"Category#{Id}"; } }
     public string ContainerUiElName { get { return $"CategoryContainer#{Id}"; } }
+
+    public Category(CategoryList categoryList)
+    {
+        CategoryList = categoryList;
+    }
+
 
     public void AddToCentroid(Vector3 vector)
     {

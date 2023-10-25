@@ -25,7 +25,7 @@ public class CategoryList : ListManager<Category>
 
     public async void AddToList()
     {
-        var category = new Category();
+        var category = new Category(this);
         category.YCoordinate = GetYCoordinate();
         await AddToList(category);
         await category.AddToList();
