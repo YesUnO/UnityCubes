@@ -9,6 +9,7 @@ public class ItemDetail : IIdentifiable, IDisposable
     public Vector3 ChangedPosition { get; set; }
     public GameObject ItemObject { get; set; }
     public Category Category { get; set; }
+    public string UiElName { get { return $"ItemDetail#{Id}"; } }
 
     public void Dispose()
     {

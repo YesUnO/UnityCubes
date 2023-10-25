@@ -13,6 +13,9 @@ public class Category : ListManager<ItemDetail>, IIdentifiable
     public Vector3 Centroid { get; private set; }
     public int ItemCount { get; private set; }
 
+    public string UiElName { get { return $"Category#{Id}"; } }
+    public string ContainerUiElName { get { return $"CategoryContainer#{Id}"; } }
+
     public void AddToCentroid(Vector3 vector)
     {
         Centroid = (Centroid * ItemCount + vector) / (ItemCount + 1);

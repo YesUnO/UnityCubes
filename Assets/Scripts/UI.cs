@@ -32,7 +32,7 @@ public class UI : MonoBehaviour
 
         var cubeDistanceSlider = root.Q<Slider>("CubeDistance");
         cubeDistanceSlider.focusable = false;
-        cubeDistanceSlider.RegisterCallback<ChangeEvent<float>>((evt)=>ItemManager.Instance.ChangeCubeDistance(evt.newValue));
+        cubeDistanceSlider.RegisterCallback<ChangeEvent<float>>((evt) => ItemManager.Instance.ChangeCubeDistance(evt.newValue));
 
         var addCategoryBtn = root.Q<Button>("AddCategory");
         addCategoryBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.AddToList(); });
@@ -57,14 +57,14 @@ public class UI : MonoBehaviour
     }
 
     #region VisualElementsCreation
-    private Button CreateListItemVisualEl<T>(int id, Color color, ListManager<T> list) where T : class, IIdentifiable, IDisposable
+    private Button CreateListItemVisualEl<T>(T item, Color color, ListManager<T> list) where T : class, IIdentifiable, IDisposable
     {
         var btn = new Button();
         btn.AddToClassList("genericBtn");
-        btn.name = $"{typeof(T)}#{id}";
-        btn.text = id.ToString();
+        btn.name = item.UiElName;
+        btn.text = item.Id.ToString();
         btn.style.color = color;
-        btn.RegisterCallback<ClickEvent>(delegate { list.ActivateItem(id); });
+        btn.RegisterCallback<ClickEvent>(delegate { list.ActivateItem(item.Id); });
         return btn;
     }
 
@@ -82,11 +82,11 @@ public class UI : MonoBehaviour
         return Color.black;
     }
 
-    private void CreateCategoryItemContainerVisualEl(int id)
+    private void CreateCategoryItemContainerVisualEl(string name)
     {
         var container = new VisualElement();
         container.style.flexDirection = FlexDirection.Row;
-        container.name = $"CategoryContainer#{id}";
+        container.name = name;
         var categoriesList = _categoryDetailContainer.Q<VisualElement>("ListItemsContainer");
         categoriesList.Add(container);
     }
@@ -97,10 +97,10 @@ public class UI : MonoBehaviour
     {
         try
         {
-            var categoryId = ItemManager.Instance.Categories.ActiveItem.Id;
+            var category = ItemManager.Instance.Categories.ActiveItem;
             ItemManager.Instance.RemoveActiveCategory();
-            var btn = _categoriesContainer.Q<Button>($"Category#{categoryId}");
-            var container = _categoryDetailContainer.Q($"CategoryContainer#{categoryId}");
+            var btn = _categoriesContainer.Q<Button>(category.UiElName);
+            var container = _categoryDetailContainer.Q(category.ContainerUiElName);
             btn.RemoveFromHierarchy();
             container.RemoveFromHierarchy();
         }
@@ -108,21 +108,21 @@ public class UI : MonoBehaviour
         {
             Debug.LogError(ex.Message);
         }
-        
+
     }
 
     private void DeleteActiveItemCallback()
     {
         try
         {
-            var itemId = ItemManager.Instance.Categories.ActiveItem.ActiveItem.Id;
+            var item = ItemManager.Instance.Categories.ActiveItem.ActiveItem;
             ItemManager.Instance.RemoveActiveItem();
-            var btn = _categoriesContainer.Q<Button>($"ItemDetial#{itemId}");
+            var btn = _categoryDetailContainer.Q<Button>(item.UiElName);
             btn.RemoveFromHierarchy();
         }
         catch (InvalidOperationException ex)
         {
-            Debug.LogError(ex.Message);
+            //Debug.LogError(ex.Message);
         }
 
     }
@@ -134,10 +134,10 @@ public class UI : MonoBehaviour
         category.SubscribeToItemAdded((item) => HandleItemCreated(item));
         category.SubscribeToItemActivated((id) => HandleItemActivated(id));
 
-        CreateCategoryItemContainerVisualEl(category.Id);
+        CreateCategoryItemContainerVisualEl(category.ContainerUiElName);
 
         var color = GetGameObjectColor(category.Prefab);
-        var btn = CreateListItemVisualEl(category.Id, color, ItemManager.Instance.Categories);
+        var btn = CreateListItemVisualEl(category, color, ItemManager.Instance.Categories);
 
         var categoriesList = _categoriesContainer.Q<VisualElement>("ListItemsContainer");
         categoriesList.Add(btn);
@@ -148,8 +148,8 @@ public class UI : MonoBehaviour
     private Task HandleItemCreated(ItemDetail itemDetail)
     {
         var color = GetGameObjectColor(itemDetail.Category.Prefab);
-        var btn = CreateListItemVisualEl(itemDetail.Id, color, itemDetail.Category);
-        var categoryContainer = _categoryDetailContainer.Q<VisualElement>($"CategoryContainer#{itemDetail.Category.Id}");
+        var btn = CreateListItemVisualEl(itemDetail, color, itemDetail.Category);
+        var categoryContainer = _categoryDetailContainer.Q<VisualElement>(itemDetail.Category.ContainerUiElName);
         categoryContainer.Add(btn);
         return Task.CompletedTask;
     }
@@ -158,7 +158,7 @@ public class UI : MonoBehaviour
     {
         if (category.Id == _activeCategoryId)
         {
-            var item = _categoriesContainer.Q<Button>($"Category#{category.Id}");
+            var item = _categoriesContainer.Q<Button>(category.UiElName);
             if (!item.ClassListContains("highlighted"))
             {
                 item.AddToClassList("highlighted");
@@ -167,7 +167,7 @@ public class UI : MonoBehaviour
         }
         foreach (var item in _categoryDetailContainer.Q<VisualElement>("ListItemsContainer").Children())
         {
-            if (item.name == $"CategoryContainer#{category.Id}")
+            if (item.name == category.ContainerUiElName)
             {
                 item.style.display = DisplayStyle.Flex;
             }
@@ -178,7 +178,7 @@ public class UI : MonoBehaviour
         }
         foreach (var item in _categoriesContainer.Q<VisualElement>("ListItemsContainer").Children())
         {
-            if (item.name == $"Category#{category.Id}")
+            if (item.name == category.UiElName)
             {
                 item.AddToClassList("highlighted");
             }
@@ -194,16 +194,16 @@ public class UI : MonoBehaviour
     {
         if (itemDetail.Id == _activeItemDetailId)
         {
-            var item = _categoryDetailContainer.Q<Button>($"ItemDetail#{itemDetail.Id}");
+            var item = _categoryDetailContainer.Q<Button>(itemDetail.UiElName);
             if (!item.ClassListContains("highlighted"))
             {
                 item.AddToClassList("highlighted");
             }
             return;
         }
-        foreach (var item in _categoryDetailContainer.Q<VisualElement>($"CategoryContainer#{itemDetail.Category.Id}").Children())
+        foreach (var item in _categoryDetailContainer.Q<VisualElement>(itemDetail.Category.ContainerUiElName).Children())
         {
-            if (item.name == $"ItemDetail#{itemDetail.Id}")
+            if (item.name == itemDetail.UiElName)
             {
                 item.AddToClassList("highlighted");
             }

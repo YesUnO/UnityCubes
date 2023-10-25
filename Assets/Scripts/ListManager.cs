@@ -79,15 +79,18 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         {
             ActiveItem = Items.FirstOrDefault();
         }
-        if (Items.Contains(item))
+        else if (Items.Contains(item))
         {
             ActiveItem = item;
         }
-        PublishItemActivated(item);
+        if (ActiveItem != null)
+        {
+            PublishItemActivated(ActiveItem);
+        }
     }
     public void RemoveActiveFromList()
     {
-        if (Items.Count<=1 || ActiveItem == null)
+        if (Items.Count <= 1 || ActiveItem == null)
         {
             throw new InvalidOperationException("Cant remove last item.");
         }
@@ -126,4 +129,5 @@ public interface IIdentifiable
 {
     int Id { get; set; }
     string Name { get; set; }
+    string UiElName { get; }
 }
