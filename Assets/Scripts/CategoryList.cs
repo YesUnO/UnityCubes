@@ -7,6 +7,7 @@ public class CategoryList : ListManager<Category>
     public static int GlobalItemId { get; set; }
     public float CubeDistance { get; set; } = 1.5f;
     public List<int> MissingYCoordinates { get; set; } = new();
+    public List<Vector3> MissingPositions { get; set; } = new();
     public int NextYCoordinates { get; set; } = 0;
 
     public async void AddToList()

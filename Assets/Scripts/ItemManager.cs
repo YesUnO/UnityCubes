@@ -52,6 +52,8 @@ public class ItemManager : MonoBehaviour
         Categories.RemoveActiveFromList();
 
         Categories.MissingYCoordinates.Add(category.YCoordinate);
+        Categories.MissingPositions.AddRange(category.Items.Select(x=>x.ChangedPosition).Where(x=>x.y == category.YCoordinate).ToList());
+
         var prefab = Prefabs.FirstOrDefault(x => x.gameObj == category.Prefab);
         prefab.used = false;
 
@@ -63,18 +65,9 @@ public class ItemManager : MonoBehaviour
         var itemPos = Categories.ActiveItem.ActiveItem.ChangedPosition;
         Categories.ActiveItem.RemoveActiveFromList();
 
-        AddToMissingCoordinates(itemPos);
+        Categories.MissingPositions.Add(itemPos);
 
         AdjustCamera();
-    }
-
-    private void AddToMissingCoordinates(Vector3 pos)
-    {
-        var category = Categories.Items.FirstOrDefault(x => x.YCoordinate == pos.y);
-        if (category != null)
-        {
-            category.MissingCoordinates.Add(pos);
-        }
     }
 
     public void AdjustCamera()
@@ -175,16 +168,29 @@ public class ItemManager : MonoBehaviour
 
     private Vector3 GetXZCoordinates(Category category)
     {
+        var missing = Categories.MissingPositions.Where(x=>x.y == category.YCoordinate).ToList();
         if (category.MissingCoordinates.Count > 0)
         {
-            var res = category.MissingCoordinates[0];
-            category.MissingCoordinates.RemoveAt(0);
+            var res = missing[0];
+            Categories.MissingPositions.RemoveAt(Categories.MissingPositions.IndexOf(res));
             return res;
 
         }
-        var xyCoordinates = new Vector2();
+        var xyCoordinates = CalculateNewXy(category.LastAdded);
 
-        var lastAdded = category.LastAdded;
+        var existingPos = Categories.Items.SelectMany(x => x.Items).Select(x => x.ChangedPosition).ToList();
+        while (existingPos.Contains(new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y)))
+        {
+            xyCoordinates = CalculateNewXy(xyCoordinates);
+        }
+
+        category.LastAdded = xyCoordinates;
+        return new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y);
+    }
+
+    private Vector2 CalculateNewXy(Vector2 lastAdded)
+    {
+        var xyCoordinates = new Vector2();
 
         if (lastAdded.x < lastAdded.y)
         {
@@ -198,9 +204,7 @@ public class ItemManager : MonoBehaviour
         {
             xyCoordinates = new Vector2(0, lastAdded.y + 1);
         }
-
-        category.LastAdded = xyCoordinates;
-        return new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y);
+        return xyCoordinates;
     }
     #endregion
 
