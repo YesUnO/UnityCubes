@@ -33,7 +33,17 @@ public class CategoryList : ListManager<Category>
 
     private int GetYCoordinate()
     {
-        return MissingYCoordinates.Count > 0 ? MissingYCoordinates.FirstOrDefault(): NextYCoordinates++;
+        var res = 0;
+        if (MissingYCoordinates.Count > 0)
+        {
+            res = MissingYCoordinates[0];
+            MissingYCoordinates.RemoveAt(0);
+        }
+        else
+        {
+            res = NextYCoordinates++;
+        }
+        return res;
     }
 
     public List<ItemDetail> GetItemDetailsByGameObjects(List<GameObject> gameObjects)

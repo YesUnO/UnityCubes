@@ -11,9 +11,9 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
     public T ActiveItem { get; set; }
 
     //events
-    public Func<T, Task> ItemAdded { get; set; }
-    private List<Func<T, Task>> _itemAddedSubscribers = new();
-    public void SubscribeToItemAdded(Func<T, Task> itemAdded, int? priority = null)
+    public Func<T, Task<bool>> ItemAdded { get; set; }
+    private List<Func<T, Task<bool>>> _itemAddedSubscribers = new();
+    public void SubscribeToItemAdded(Func<T, Task<bool>> itemAdded, int? priority = null)
     {
         var count = _itemAddedSubscribers.Count;
         if (priority != null && count > 0 && count >= priority)
@@ -26,12 +26,19 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         }
         ItemAdded += itemAdded;
     }
-    public async Task PublishItemAdded(T item)
+    public async Task<bool> PublishItemAdded(T item)
     {
+        var res = true;
         foreach (var subscriber in _itemAddedSubscribers)
         {
-            await subscriber.Invoke(item);
+            var subRes = await subscriber.Invoke(item);
+            if (!subRes)
+            {
+                item = null;
+            }
+            res &= subRes;
         }
+        return res;
     }
 
 
@@ -65,8 +72,11 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         item.Id = item.Id == -1 ? CategoryList.GlobalItemId++ : NextAvailableId++;
         item.Name = item.Id.ToString();
         Items.Add(item);
-        await PublishItemAdded(item);
-        ActivateItem(item);
+        var itemAdded = await PublishItemAdded(item);
+        if (itemAdded)
+        {
+            ActivateItem(item);
+        }
     }
 
     public void ActivateItem(int id)
@@ -94,10 +104,15 @@ public class ListManager<T> : IDisposable where T : class, IIdentifiable, IDispo
         {
             throw new InvalidOperationException("Cant remove last item.");
         }
-        var index = Items.IndexOf(ActiveItem);
-        ActiveItem.Dispose();
-        Items.RemoveAt(index);
+        RemoveFromList(ActiveItem);
         ActivateItem();
+    }
+
+    public void RemoveFromList(T item)
+    {
+        var index = Items.IndexOf(item);
+        item.Dispose();
+        Items.RemoveAt(index);
     }
 
     //Dispose

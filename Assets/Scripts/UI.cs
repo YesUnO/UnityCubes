@@ -14,9 +14,10 @@ public class UI : MonoBehaviour
     private VisualElement _categoryDetailContainer;
     private VisualElement _categoriesContainer;
     private VisualElement _itemDetailContainer;
+    private ScrollView _itemsScrollView;
 
     private int _activeCategoryId;
-    private int _activeItemDetailId;
+    private ItemDetail _activeItem;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +27,7 @@ public class UI : MonoBehaviour
         _categoryDetailContainer = root.Q("Category");
         _categoriesContainer = root.Q("CategoryList");
         _itemDetailContainer = root.Q("ItemDetail");
+        _itemsScrollView = _categoryDetailContainer.Q<ScrollView>("ListItemsContainer");
 
         root.styleSheets.Add(_uiStyleSheet);
 
@@ -56,7 +58,7 @@ public class UI : MonoBehaviour
 
     }
 
-    #region VisualElementsCreation
+    #region VisualElementsManagment
     private Button CreateListItemVisualEl<T>(T item, Color color, ListManager<T> list) where T : class, IIdentifiable, IDisposable
     {
         var btn = new Button();
@@ -87,8 +89,16 @@ public class UI : MonoBehaviour
         var container = new VisualElement();
         container.style.flexDirection = FlexDirection.Row;
         container.name = name;
-        var categoriesList = _categoryDetailContainer.Q<VisualElement>("ListItemsContainer");
-        categoriesList.Add(container);
+        _itemsScrollView.Add(container);
+    }
+
+    private void ScrollToActiveItem()
+    {
+        var btn = _itemsScrollView.Q<Button>(_activeItem.UiElName);
+        if (btn != null)
+        {
+            _itemsScrollView.ScrollTo(btn);
+        }
     }
     #endregion
 
@@ -129,8 +139,12 @@ public class UI : MonoBehaviour
 
 
     #region EventHandlers
-    private Task HandleCategoryCreated(Category category)
+    private Task<bool> HandleCategoryCreated(Category category)
     {
+        if (category == null)
+        {
+            return Task.FromResult(false);
+        }
         category.SubscribeToItemAdded((item) => HandleItemCreated(item));
         category.SubscribeToItemActivated((id) => HandleItemActivated(id));
 
@@ -139,19 +153,19 @@ public class UI : MonoBehaviour
         var color = GetGameObjectColor(category.Prefab);
         var btn = CreateListItemVisualEl(category, color, ItemManager.Instance.Categories);
 
-        var categoriesList = _categoriesContainer.Q<VisualElement>("ListItemsContainer");
+        var categoriesList = _categoriesContainer.Q<ScrollView>("ListItemsContainer");
         categoriesList.Add(btn);
 
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
-    private Task HandleItemCreated(ItemDetail itemDetail)
+    private Task<bool> HandleItemCreated(ItemDetail itemDetail)
     {
         var color = GetGameObjectColor(itemDetail.Category.Prefab);
         var btn = CreateListItemVisualEl(itemDetail, color, itemDetail.Category);
         var categoryContainer = _categoryDetailContainer.Q<VisualElement>(itemDetail.Category.ContainerUiElName);
         categoryContainer.Add(btn);
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     private void HandleCategoryActivated(Category category)
@@ -165,7 +179,7 @@ public class UI : MonoBehaviour
             }
             return;
         }
-        foreach (var item in _categoryDetailContainer.Q<VisualElement>("ListItemsContainer").Children())
+        foreach (var item in _itemsScrollView.Children())
         {
             if (item.name == category.ContainerUiElName)
             {
@@ -176,7 +190,7 @@ public class UI : MonoBehaviour
                 item.style.display = DisplayStyle.None;
             }
         }
-        foreach (var item in _categoriesContainer.Q<VisualElement>("ListItemsContainer").Children())
+        foreach (var item in _categoriesContainer.Q<ScrollView>("ListItemsContainer").Children())
         {
             if (item.name == category.UiElName)
             {
@@ -188,11 +202,13 @@ public class UI : MonoBehaviour
             }
         }
         _activeCategoryId = category.Id;
+        _activeItem = category.ActiveItem;
+        ScrollToActiveItem();
     }
 
     private void HandleItemActivated(ItemDetail itemDetail)
     {
-        if (itemDetail.Id == _activeItemDetailId)
+        if (itemDetail == _activeItem)
         {
             var item = _categoryDetailContainer.Q<Button>(itemDetail.UiElName);
             if (!item.ClassListContains("highlighted"))
@@ -212,8 +228,8 @@ public class UI : MonoBehaviour
                 item.RemoveFromClassList("highlighted");
             }
         }
-        _activeItemDetailId = itemDetail.Id;
-
+        _activeItem = itemDetail;
+        ScrollToActiveItem();
     }
     #endregion
 

@@ -20,7 +20,7 @@ public enum ItemState
 
 public class ItemManager : MonoBehaviour
 {
-    
+
     public List<UsedPrefab> Prefabs = new();
     public CategoryList Categories { get; private set; } = new();
 
@@ -38,7 +38,7 @@ public class ItemManager : MonoBehaviour
         _cameraControlls = FindObjectOfType<CameraControlls>();
         Categories.SubscribeToItemAdded((category) => HandleCategoryAdded(category), 0);
         Categories.SubscribeToItemActivated((category) => HandleCategoryActivated(category));
-        
+
         Categories.AddToList();
     }
 
@@ -50,18 +50,34 @@ public class ItemManager : MonoBehaviour
 
     public void RemoveActiveCategory()
     {
-        var categoryCentroid = Categories.ActiveItem.Centroid;
-        var categoryCount = Categories.ActiveItem.ItemCount;
+        var category = Categories.ActiveItem;
+        var categoryCentroid = category.Centroid;
+        var categoryCount = category.ItemCount;
         Categories.RemoveActiveFromList();
-        Categories.SubstractFromCentroid(categoryCentroid,categoryCount);
+
+        Categories.MissingYCoordinates.Add(category.YCoordinate);
+        var prefab = Prefabs.FirstOrDefault(x => x.gameObj == category.Prefab);
+        prefab.used = false;
+
+        Categories.SubstractFromCentroid(categoryCentroid, categoryCount);
+        AdjustCamera();
     }
 
     public void RemoveActiveItem()
     {
         var itemPos = Categories.ActiveItem.ActiveItem.ChangedPosition;
         Categories.ActiveItem.RemoveActiveFromList();
+
+        Categories.ActiveItem.MissingCoordinates.Add(itemPos);
+
         Categories.SubstractFromCentroid(itemPos);
         Categories.ActiveItem.SubstractFromCentroid(itemPos);
+        AdjustCamera();
+    }
+
+    public void AdjustCamera()
+    {
+        _cameraControlls.AdjustTargetPosition(Categories.Centroid, Categories.CubeDistance);
     }
 
     #region CubeProperties
@@ -74,16 +90,6 @@ public class ItemManager : MonoBehaviour
         }
         Categories.CubeDistance = distance;
         _cameraControlls.AdjustTargetPosition(Categories.Centroid, distance);
-    }
-
-    public bool? GetItemState(GameObject gameObject, ItemState itemState)
-    {
-        var selectedChild = gameObject.transform.Find(itemState.ToString());
-        if (selectedChild != null)
-        {
-            return selectedChild.gameObject.activeSelf;
-        }
-        return null;
     }
 
     public void SetItemState(GameObject gameObject, ItemState itemState, bool value = true)
@@ -110,7 +116,7 @@ public class ItemManager : MonoBehaviour
         (item1.ChangedPosition, item2.ChangedPosition) = (item2.ChangedPosition, item1.ChangedPosition);
     }
 
-    private void SetActiveItem(ItemDetail itemDetail)
+    private void SetActiveItemGameObj(ItemDetail itemDetail)
     {
         if (itemDetail == null)
         {
@@ -126,75 +132,75 @@ public class ItemManager : MonoBehaviour
     #endregion
 
     #region EventHandlers
-    private Task HandleCategoryAdded(Category category)
+    private Task<bool> HandleCategoryAdded(Category category)
     {
         var prefab = Prefabs.FirstOrDefault(x => !x.used);
         if (prefab == null)
         {
-            //error handling?
-            return Task.CompletedTask;
+            Categories.RemoveFromList(category);
+            Categories.MissingYCoordinates.Add(category.YCoordinate);
+            return Task.FromResult(false);
         }
         category.Prefab = prefab.gameObj;
         prefab.used = true;
 
         category.SubscribeToItemAdded((itemDetail) => HandleItemAdded(itemDetail), 0);
         category.SubscribeToItemActivated((itemDetail) => HandleItemActivated(itemDetail));
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     private void HandleItemActivated(ItemDetail itemDetail)
     {
-        SetActiveItem(itemDetail);
+        SetActiveItemGameObj(itemDetail);
     }
 
     private void HandleCategoryActivated(Category category)
     {
-        SetActiveItem(category.ActiveItem);
+        SetActiveItemGameObj(category.ActiveItem);
     }
 
 
-    private Task HandleItemAdded(ItemDetail itemDetail)
+    private Task<bool> HandleItemAdded(ItemDetail itemDetail)
     {
         var category = itemDetail.Category;
-        var xz = GetXZCoordinates(category);
-        var position = new Vector3(xz.x, category.YCoordinate, xz.y);
+        var position = GetXZCoordinates(category);
         var cube = Instantiate(category.Prefab, position * Categories.CubeDistance, Quaternion.identity);
 
         category.AddToCentroid(position);
         Categories.AddToCentroid(position);
-        _cameraControlls.AdjustTargetPosition(Categories.Centroid, Categories.CubeDistance);
+        AdjustCamera();
 
         itemDetail.ItemObject = cube;
         itemDetail.OriginalPosition = position;
         itemDetail.ChangedPosition = position;
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
-    private Vector2 GetXZCoordinates(Category category)
+    private Vector3 GetXZCoordinates(Category category)
     {
         if (category.MissingCoordinates.Count > 0)
         {
             return category.MissingCoordinates.FirstOrDefault();
         }
-        var res = new Vector2();
+        var xyCoordinates = new Vector2();
 
         var lastAdded = category.LastAdded;
 
         if (lastAdded.x < lastAdded.y)
         {
-            res = new Vector2(lastAdded.y, lastAdded.x);
+            xyCoordinates = new Vector2(lastAdded.y, lastAdded.x);
         }
         else if (lastAdded.x > lastAdded.y)
         {
-            res = new Vector2(lastAdded.y + 1, lastAdded.x);
+            xyCoordinates = new Vector2(lastAdded.y + 1, lastAdded.x);
         }
         else if (lastAdded.x != -1 && lastAdded.x == lastAdded.y)
         {
-            res = new Vector2(0, lastAdded.y + 1);
+            xyCoordinates = new Vector2(0, lastAdded.y + 1);
         }
 
-        category.LastAdded = res;
-        return res;
+        category.LastAdded = xyCoordinates;
+        return new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y);
     }
     #endregion
 
