@@ -66,11 +66,20 @@ public class ItemManager : MonoBehaviour
         var itemPos = Categories.ActiveItem.ActiveItem.ChangedPosition;
         Categories.ActiveItem.RemoveActiveFromList();
 
-        Categories.ActiveItem.MissingCoordinates.Add(itemPos);
+        AddToMissingCoordinates(itemPos);
 
         Categories.SubstractFromCentroid(itemPos);
         Categories.ActiveItem.SubstractFromCentroid(itemPos);
         AdjustCamera();
+    }
+
+    private void AddToMissingCoordinates(Vector3 pos)
+    {
+        var category = Categories.Items.FirstOrDefault(x => x.YCoordinate == pos.y);
+        if (category != null)
+        {
+            category.MissingCoordinates.Add(pos);
+        }
     }
 
     public void AdjustCamera()
