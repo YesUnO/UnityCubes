@@ -8,7 +8,6 @@ public class Category : ListManager<ItemDetail>, IIdentifiable
     public string Name { get; set; }
     public GameObject Prefab { get; set; }
     public int YCoordinate { get; set; }
-    public List<Vector3> MissingCoordinates { get; set; } = new();
     public Vector2 LastAdded { get; set; } = new Vector2(-1, -1);
     public CategoryList CategoryList { get; }
 

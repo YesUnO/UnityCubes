@@ -49,10 +49,12 @@ public class ItemManager : MonoBehaviour
     public void RemoveActiveCategory()
     {
         var category = Categories.ActiveItem;
+
+        var categoriesPositions = category.Items.Select(x => x.ChangedPosition).ToList();
         Categories.RemoveActiveFromList();
 
         Categories.MissingYCoordinates.Add(category.YCoordinate);
-        Categories.MissingPositions.AddRange(category.Items.Select(x=>x.ChangedPosition).Where(x=>x.y == category.YCoordinate).ToList());
+        Categories.MissingPositions.AddRange(categoriesPositions);
 
         var prefab = Prefabs.FirstOrDefault(x => x.gameObj == category.Prefab);
         prefab.used = false;
@@ -169,7 +171,7 @@ public class ItemManager : MonoBehaviour
     private Vector3 GetXZCoordinates(Category category)
     {
         var missing = Categories.MissingPositions.Where(x=>x.y == category.YCoordinate).ToList();
-        if (category.MissingCoordinates.Count > 0)
+        if (missing.Count > 0)
         {
             var res = missing[0];
             Categories.MissingPositions.RemoveAt(Categories.MissingPositions.IndexOf(res));
