@@ -50,7 +50,7 @@ public class ItemManager : MonoBehaviour
     {
         var category = Categories.ActiveItem;
 
-        var categoriesPositions = category.Items.Select(x => x.ChangedPosition).ToList();
+        var categoriesPositions = category.Items.Select(x => x.ChangedPosition).Where(vector => vector.y != category.YCoordinate).ToList();
         Categories.RemoveActiveFromList();
 
         Categories.MissingYCoordinates.Add(category.YCoordinate);
@@ -74,7 +74,7 @@ public class ItemManager : MonoBehaviour
 
     public void AdjustCamera()
     {
-        var vectors = Categories.Items.SelectMany(x=>x.Items).Select(x=>x.ChangedPosition).ToList();
+        var vectors = Categories.Items.SelectMany(x => x.Items).Select(x => x.ChangedPosition).ToList();
         var centroid = vectors.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / vectors.Count;
         _cameraControlls.AdjustTargetPosition(centroid, Categories.CubeDistance);
     }
@@ -170,18 +170,20 @@ public class ItemManager : MonoBehaviour
 
     private Vector3 GetXZCoordinates(Category category)
     {
-        var missing = Categories.MissingPositions.Where(x=>x.y == category.YCoordinate).ToList();
-        if (missing.Count > 0)
+        
+        Vector2 xyCoordinates = new();
+        if (category.LastAdded != new Vector2(-1, -1))
+        {
+            xyCoordinates = GetNewXyPosition(category);
+        }
+        var missing = Categories.MissingPositions.Where(x => x.y == category.YCoordinate).OrderBy(x => x.magnitude).ToList();
+
+        if (missing.Count > 0 && missing[0].magnitude< xyCoordinates.magnitude)
         {
             var res = missing[0];
             Categories.MissingPositions.RemoveAt(Categories.MissingPositions.IndexOf(res));
             return res;
 
-        }
-        Vector2 xyCoordinates = new();
-        if (category.LastAdded != new Vector2(-1, -1))
-        {
-            xyCoordinates = GetNewXyPosition(category);
         }
 
         category.LastAdded = xyCoordinates;
@@ -192,6 +194,7 @@ public class ItemManager : MonoBehaviour
     {
         var xyCoordinates = CalculateNewXy(category.LastAdded);
 
+        //TODO: slow
         var existingPos = Categories.Items.SelectMany(x => x.Items).Select(x => x.ChangedPosition).ToList();
         while (existingPos.Contains(new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y)))
         {

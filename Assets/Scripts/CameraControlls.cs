@@ -50,7 +50,7 @@ public class CameraControlls : MonoBehaviour
             _centroid = centroid;
             _cubeDistance = cubeDistance;
             maxDistance = Mathf.Max(20f, _centroid.magnitude * 1.5f * _cubeDistance);
-            _newTargetPosition = _centroid * _cubeDistance * 1.5f;
+            _newTargetPosition = _centroid * _cubeDistance;
             _targetMoving = true;
         }
     }
@@ -58,7 +58,8 @@ public class CameraControlls : MonoBehaviour
     private void EaseIntoNewPosition()
     {
         var distance = Vector3.Distance(_newTargetPosition, targetPosition);
-        easeSpeed = Mathf.Max(easeSpeed, distance/easeSpeed); 
+        easeSpeed = Mathf.Max(easeSpeed, distance);
+        Debug.Log(easeSpeed);
         targetPosition = Vector3.MoveTowards(targetPosition, _newTargetPosition, Time.deltaTime * easeSpeed);
         if (targetPosition == _newTargetPosition)
         {
