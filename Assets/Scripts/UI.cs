@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,22 +18,24 @@ public class UI : MonoBehaviour
     private ScrollView _itemsScrollView;
 
     private VisualElement _scrollTo = null;
+    private Label _errors;
     private Button _addItemBtn;
 
     private int _multiplier = 1;
+    private bool _isShowMsgCoroutineRunning = false;
 
     // Start is called before the first frame update
     void Start()
     {
         var root = _uiDocument.rootVisualElement;
 
+        root.styleSheets.Add(_uiStyleSheet);
+
         _categoryDetailContainer = root.Q("Category");
         _categoriesContainer = root.Q("CategoryList");
         _itemDetailContainer = root.Q("ItemDetail");
+        _errors = root.Q<Label>("Errors");
         _itemsScrollView = _categoryDetailContainer.Q<ScrollView>("ListItemsContainer");
-
-        root.styleSheets.Add(_uiStyleSheet);
-
 
         var cubeDistanceSlider = root.Q<Slider>("CubeDistance");
         cubeDistanceSlider.focusable = false;
@@ -104,6 +107,26 @@ public class UI : MonoBehaviour
         _itemsScrollView.Add(container);
     }
 
+    private IEnumerator ShowMsgCoroutine(string msg)
+    {
+        _isShowMsgCoroutineRunning = true;
+        _errors.text = msg;
+
+        yield return new WaitForSeconds(5f);
+
+        _errors.text = string.Empty;
+        _isShowMsgCoroutineRunning = false;
+    }
+
+    private void ShowNewMsg(string msg) 
+    {
+        if (_isShowMsgCoroutineRunning)
+        {
+            StopAllCoroutines();
+        }
+        StartCoroutine(ShowMsgCoroutine(msg));
+    }
+
     #endregion
 
     #region ClickCallbacks
@@ -137,7 +160,7 @@ public class UI : MonoBehaviour
         }
         catch (InvalidOperationException ex)
         {
-            //Debug.LogError(ex.Message);
+            ShowNewMsg(ex.Message);
         }
 
     }
@@ -153,18 +176,18 @@ public class UI : MonoBehaviour
         }
         catch (InvalidOperationException ex)
         {
-            //Debug.LogError(ex.Message);
+            ShowNewMsg(ex.Message);
         }
 
     }
     #endregion
-
 
     #region EventHandlers
     private Task<bool> HandleCategoryCreated(Category category)
     {
         if (category == null)
         {
+            ShowNewMsg("Cannot create more categories.");
             return Task.FromResult(false);
         }
         category.SubscribeToItemAdded((item) => HandleItemCreated(item));
@@ -183,6 +206,11 @@ public class UI : MonoBehaviour
 
     private Task<bool> HandleItemCreated(ItemDetail itemDetail)
     {
+        if (itemDetail == null)
+        {
+            ShowNewMsg("Cannot create more items in category.");
+            return Task.FromResult(false);
+        }
         var color = GetGameObjectColor(itemDetail.Category.Prefab);
         var btn = CreateListItemVisualEl(itemDetail, color, itemDetail.Category);
         var categoryContainer = _categoryDetailContainer.Q<VisualElement>(itemDetail.Category.ContainerUiElName);

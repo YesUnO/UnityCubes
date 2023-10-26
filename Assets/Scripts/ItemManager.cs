@@ -156,6 +156,11 @@ public class ItemManager : MonoBehaviour
     private Task<bool> HandleItemAdded(ItemDetail itemDetail)
     {
         var category = itemDetail.Category;
+        if (category.Items.Count >= 101)
+        {
+            category.RemoveFromList(itemDetail);
+            return Task.FromResult(false);
+        }
         var position = GetXZCoordinates(category);
         var cube = Instantiate(category.Prefab, position * Categories.CubeDistance, Quaternion.identity);
 

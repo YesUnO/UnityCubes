@@ -1,9 +1,12 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement style="flex-grow: 1;">
-        <ui:GroupBox name="Controlls" text="Controlls" style="height: 140px;">
-            <ui:VisualElement name="Sliders" style="flex-grow: 1;">
-                <ui:Slider picking-mode="Ignore" label="Cube Distance" value="1.5" high-value="4" name="CubeDistance" low-value="1" style="width: 234px; height: 31px;" />
-                <ui:SliderInt picking-mode="Ignore" label="Multiplier&#10;" value="1" high-value="100" name="Multiplier" low-value="1" style="width: 234px; height: 31px;" />
+        <ui:GroupBox name="Controlls" text="Controlls" style="height: 140px; flex-direction: column; justify-content: flex-start;">
+            <ui:VisualElement name="ControllsContent" style="flex-grow: 1; flex-direction: row;">
+                <ui:VisualElement name="Sliders" style="flex-grow: 1; height: 84px; width: auto;">
+                    <ui:Slider picking-mode="Ignore" label="Cube Distance" value="1.5" high-value="4" name="CubeDistance" low-value="1" style="width: 234px; height: 31px;" />
+                    <ui:SliderInt picking-mode="Ignore" label="Multiplier&#10;" value="1" high-value="5" name="Multiplier" low-value="1" style="width: 234px; height: 31px;" />
+                </ui:VisualElement>
+                <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Errors" style="width: 500px; color: rgb(147, 0, 0); font-size: 18px;" />
             </ui:VisualElement>
         </ui:GroupBox>
         <ui:GroupBox name="CategoryList" text="Category List" style="height: 196px;">
