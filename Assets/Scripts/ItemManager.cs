@@ -176,6 +176,18 @@ public class ItemManager : MonoBehaviour
             return res;
 
         }
+        Vector2 xyCoordinates = new();
+        if (category.LastAdded != new Vector2(-1, -1))
+        {
+            xyCoordinates = GetNewXyPosition(category);
+        }
+
+        category.LastAdded = xyCoordinates;
+        return new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y);
+    }
+
+    private Vector2 GetNewXyPosition(Category category)
+    {
         var xyCoordinates = CalculateNewXy(category.LastAdded);
 
         var existingPos = Categories.Items.SelectMany(x => x.Items).Select(x => x.ChangedPosition).ToList();
@@ -183,9 +195,7 @@ public class ItemManager : MonoBehaviour
         {
             xyCoordinates = CalculateNewXy(xyCoordinates);
         }
-
-        category.LastAdded = xyCoordinates;
-        return new Vector3(xyCoordinates.x, category.YCoordinate, xyCoordinates.y);
+        return xyCoordinates;
     }
 
     private Vector2 CalculateNewXy(Vector2 lastAdded)
@@ -196,11 +206,11 @@ public class ItemManager : MonoBehaviour
         {
             xyCoordinates = new Vector2(lastAdded.y, lastAdded.x);
         }
-        else if (lastAdded.x > lastAdded.y)
+        if (lastAdded.x > lastAdded.y)
         {
             xyCoordinates = new Vector2(lastAdded.y + 1, lastAdded.x);
         }
-        else if (lastAdded.x != -1 && lastAdded.x == lastAdded.y)
+        if (lastAdded.x == lastAdded.y)
         {
             xyCoordinates = new Vector2(0, lastAdded.y + 1);
         }
