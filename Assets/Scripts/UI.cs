@@ -17,7 +17,9 @@ public class UI : MonoBehaviour
     private ScrollView _itemsScrollView;
 
     private VisualElement _scrollTo = null;
+    private Button _addItemBtn;
 
+    private int _multiplier = 1;
 
     // Start is called before the first frame update
     void Start()
@@ -36,6 +38,11 @@ public class UI : MonoBehaviour
         cubeDistanceSlider.focusable = false;
         cubeDistanceSlider.RegisterCallback<ChangeEvent<float>>((evt) => ItemManager.Instance.ChangeCubeDistance(evt.newValue));
 
+        var multiplierSlider = root.Q<SliderInt>("Multiplier");
+        multiplierSlider.focusable = false;
+        multiplierSlider.RegisterCallback<ChangeEvent<int>>((evt) => ChangeMultiplier(evt.newValue));
+
+
         var addCategoryBtn = root.Q<Button>("AddCategory");
         addCategoryBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.AddToList(); });
 
@@ -45,8 +52,9 @@ public class UI : MonoBehaviour
         var deleteItemBtn = root.Q<Button>("DeleteActiveItem");
         deleteItemBtn.RegisterCallback<ClickEvent>(delegate { DeleteActiveItemCallback(); });
 
-        var addItemBtn = root.Q<Button>("AddItem");
-        addItemBtn.RegisterCallback<ClickEvent>(delegate { ItemManager.Instance.Categories.ActiveItem.AddToList(); });
+        _addItemBtn = root.Q<Button>("AddItem");
+        _addItemBtn.style.width = StyleKeyword.Auto;
+        _addItemBtn.RegisterCallback<ClickEvent>(delegate { AddItemCallback(); });
 
         ItemManager.Instance.Categories.SubscribeToItemAdded((category) => HandleCategoryCreated(category));
         ItemManager.Instance.Categories.SubscribeToItemActivated((categoryId) => HandleCategoryActivated(categoryId));
@@ -98,6 +106,23 @@ public class UI : MonoBehaviour
 
     #endregion
 
+    #region ClickCallbacks
+    private void AddItemCallback()
+    {
+        for (int i = 0; i < _multiplier; i++)
+        {
+            var activateItem = i == _multiplier - 1;
+            ItemManager.Instance.Categories.ActiveItem.AddToList(activateItem).GetAwaiter().GetResult();
+
+        }
+    }
+
+    private void ChangeMultiplier(int multiplier)
+    {
+        _multiplier = multiplier;
+
+        _addItemBtn.text = _multiplier == 1? "Add Item" : $"Add {_multiplier} Items";
+    }
 
     private void DeleteActiveCategoryCallback()
     {
@@ -132,6 +157,7 @@ public class UI : MonoBehaviour
         }
 
     }
+    #endregion
 
 
     #region EventHandlers
@@ -193,7 +219,7 @@ public class UI : MonoBehaviour
 
     private void HandleItemActivated(ItemDetail itemDetail)
     {
-        
+
         foreach (var item in _categoryDetailContainer.Q<VisualElement>(itemDetail.Category.ContainerUiElName).Children())
         {
             if (item.name == itemDetail.UiElName)
@@ -215,5 +241,4 @@ public class UI : MonoBehaviour
         }
     }
     #endregion
-
 }

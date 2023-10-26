@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -20,10 +19,10 @@ public class Category : ListManager<ItemDetail>, IIdentifiable
     }
 
 
-    public async Task AddToList()
+    public async Task AddToList(bool activate = true)
     {
         var item = new ItemDetail();
         item.Category = this;
-        await AddToList(item);
+        await AddToList(item, activate);
     }
 }

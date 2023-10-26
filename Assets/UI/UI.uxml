@@ -1,21 +1,24 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement style="flex-grow: 1;">
         <ui:GroupBox name="Controlls" text="Controlls" style="height: 140px;">
-            <ui:Slider picking-mode="Ignore" label="Cube Distance" value="1.5" high-value="4" name="CubeDistance" low-value="1" style="width: 234px;" />
+            <ui:VisualElement name="Sliders" style="flex-grow: 1;">
+                <ui:Slider picking-mode="Ignore" label="Cube Distance" value="1.5" high-value="4" name="CubeDistance" low-value="1" style="width: 234px; height: 31px;" />
+                <ui:SliderInt picking-mode="Ignore" label="Multiplier&#10;" value="1" high-value="100" name="Multiplier" low-value="1" style="width: 234px; height: 31px;" />
+            </ui:VisualElement>
         </ui:GroupBox>
         <ui:GroupBox name="CategoryList" text="Category List" style="height: 196px;">
             <ui:VisualElement style="flex-grow: 1; flex-direction: row; height: 30px; width: 500px;">
-                <ui:Button text="Add Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddCategory" style="width: 108px; height: 35px;" />
-                <ui:Button text="Delete Active Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveCategory" style="width: 163px; height: 33px;" />
+                <ui:Button text="Add Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddCategory" style="width: auto; height: 34px; align-self: flex-start;" />
+                <ui:Button text="Delete Active Category" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveCategory" style="width: auto; height: 34px; align-self: flex-start;" />
             </ui:VisualElement>
             <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="Hidden" name="ListItemsContainer" style="height: 68px; width: 337px;" />
         </ui:GroupBox>
         <ui:GroupBox name="Category" text="Category" style="height: 206px;">
-            <ui:Button text="Add Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddItem" style="width: 79px; height: 34px;" />
+            <ui:Button text="Add Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AddItem" style="width: auto; height: 34px; align-self: flex-start;" />
             <ui:ScrollView mode="Horizontal" horizontal-scroller-visibility="AlwaysVisible" name="ListItemsContainer" style="height: 68px; width: 337px;" />
         </ui:GroupBox>
         <ui:GroupBox name="ItemDetail" text="Item Detail" style="height: 163px;">
-            <ui:Button text="Delete Active Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveItem" style="width: 141px; height: 34px;" />
+            <ui:Button text="Delete Active Item" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteActiveItem" style="width: auto; height: 34px; align-self: flex-start;" />
         </ui:GroupBox>
     </ui:VisualElement>
 </ui:UXML>

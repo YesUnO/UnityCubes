@@ -67,13 +67,13 @@ public abstract class ListManager<T> : IDisposable where T : class, IIdentifiabl
 
 
     //methods
-    public async Task AddToList(T item)
+    public async Task AddToList(T item, bool activate = true)
     {
         item.Id = item.Id == -1 ? CategoryList.GlobalItemId++ : NextAvailableId++;
         item.Name = item.Id.ToString();
         Items.Add(item);
         var itemAdded = await PublishItemAdded(item);
-        if (itemAdded)
+        if (itemAdded && activate)
         {
             ActivateItem(item);
         }
@@ -91,7 +91,7 @@ public abstract class ListManager<T> : IDisposable where T : class, IIdentifiabl
         }
         if (item == ActiveItem)
         {
-            //TOFO: not yet
+            //TODO: not yet
             //return;
         }
         else if (Items.Contains(item))
